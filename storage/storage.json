@@ -1,0 +1,38 @@
+[
+	{
+		"fileContent": {
+			"contentLength": 0,
+			"contentType": "",
+			"payload": null
+		},
+		"userName": "edison4",
+		"fileName": "test.txt"
+	},
+	{
+		"fileContent": {
+			"contentLength": 0,
+			"contentType": "",
+			"payload": null
+		},
+		"userName": "edison4",
+		"fileName": "test2.txt"
+	},
+	{
+		"fileContent": {
+			"contentLength": 100,
+			"contentType": "text",
+			"payload": "VGhpcyBpcyBhIHRlc3Q="
+		},
+		"userName": "edison",
+		"fileName": "test.txt"
+	},
+	{
+		"fileContent": {
+			"contentLength": 100,
+			"contentType": "text",
+			"payload": "VGhpcyBpcyBhIHRlc3Q="
+		},
+		"userName": "edison4",
+		"fileName": "test5.txt"
+	}
+]
