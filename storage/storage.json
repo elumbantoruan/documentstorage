@@ -34,5 +34,14 @@
 		},
 		"userName": "edison",
 		"fileName": "snip.png"
+	},
+	{
+		"fileContent": {
+			"contentLength": 0,
+			"contentType": "png",
+			"payload": ""
+		},
+		"userName": "edison",
+		"fileName": "snip.png"
 	}
 ]
