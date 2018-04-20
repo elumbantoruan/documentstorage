@@ -29,7 +29,7 @@ func (f *Files) HandleUploadFile(w http.ResponseWriter, r *http.Request) {
 
 	userName, err := f.validateAuth(r)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 	vars := mux.Vars(r)
@@ -75,7 +75,7 @@ func (f *Files) HandleGetFile(w http.ResponseWriter, r *http.Request) {
 
 	userName, err := f.validateAuth(r)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 	vars := mux.Vars(r)
@@ -96,7 +96,13 @@ func (f *Files) HandleGetFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	if fs == nil {
+		// no files found
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(fs)
 }
@@ -107,7 +113,7 @@ func (f *Files) HandleGetFiles(w http.ResponseWriter, r *http.Request) {
 
 	userName, err := f.validateAuth(r)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 	files, err := f.UserStorage.GetFiles(userName)
@@ -115,6 +121,12 @@ func (f *Files) HandleGetFiles(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(model.NewException(err))
+		return
+	}
+
+	if len(files) == 0 {
+		// no files found
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
@@ -130,7 +142,7 @@ func (f *Files) HandleDeleteFile(w http.ResponseWriter, r *http.Request) {
 
 	userName, err := f.validateAuth(r)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 	vars := mux.Vars(r)

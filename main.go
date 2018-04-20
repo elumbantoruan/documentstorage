@@ -1,10 +1,15 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/elumbantoruan/documentstorage/handler"
+	"github.com/elumbantoruan/documentstorage/model"
 	"github.com/elumbantoruan/documentstorage/repository"
 	"github.com/gorilla/mux"
 )
@@ -44,6 +49,27 @@ func registerHandlers() (*mux.Router, error) {
 	m.HandleFunc("/files/{fileName}", stor.HandleGetFile).Methods("GET")
 	m.HandleFunc("/files", stor.HandleGetFiles).Methods("GET")
 	m.HandleFunc("/files/{fileName}", stor.HandleDeleteFile).Methods("DELETE")
+
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	fileName := fmt.Sprintf("%s/%s", dir, "snip.png")
+
+	f, err := os.OpenFile(fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+	defer f.Close()
+	if err != nil {
+		return nil, err
+	}
+	bytes, err := ioutil.ReadAll(f)
+	fc := model.FileContent{
+		ContentLength: len(bytes),
+		ContentType:   "png",
+		Payload:       bytes,
+	}
+	req := model.FileStorage{
+		FileContent: fc,
+		FileName:    "snip.png",
+		UserName:    "edison",
+	}
+	fs.UploadFile(req)
 
 	return m, nil
 }

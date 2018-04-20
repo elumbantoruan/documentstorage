@@ -43,13 +43,14 @@ func (login *Login) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, _ := login.createToken(creds.UserName)
+	token, _ := login.CreateToken(creds.UserName)
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(model.NewUserToken(token))
 }
 
-func (login *Login) createToken(userName string) (string, error) {
+// CreateToken creates JWT token
+func (login *Login) CreateToken(userName string) (string, error) {
 	signKey := []byte("mysupersecretkey")
 	claims := &jwt.MapClaims{
 		"username": userName,
