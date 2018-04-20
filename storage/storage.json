@@ -1,21 +1,12 @@
 [
 	{
 		"fileContent": {
-			"contentLength": 0,
-			"contentType": "",
-			"payload": null
+			"contentLength": 10,
+			"contentType": "html",
+			"payload": "VGhpcyBpcyBhIHRlc3Q="
 		},
 		"userName": "edison4",
-		"fileName": "test.txt"
-	},
-	{
-		"fileContent": {
-			"contentLength": 0,
-			"contentType": "",
-			"payload": null
-		},
-		"userName": "edison4",
-		"fileName": "test2.txt"
+		"fileName": "test2.html"
 	},
 	{
 		"fileContent": {

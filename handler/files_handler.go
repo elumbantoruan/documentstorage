@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -79,7 +78,27 @@ func (f *Files) HandleGetFile(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	log.Println(userName)
+	vars := mux.Vars(r)
+	fileName := ""
+
+	if _, found := vars["fileName"]; found {
+		fileName = vars["fileName"]
+	} else {
+		// no filename
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	fs, err := f.UserStorage.GetFile(userName, fileName)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(model.NewException(err))
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(fs)
 }
 
 // HandleGetFiles handles get all files for specific user
@@ -91,7 +110,18 @@ func (f *Files) HandleGetFiles(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	log.Println(userName)
+	files, err := f.UserStorage.GetFiles(userName)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(model.NewException(err))
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(files)
+
 }
 
 // HandleDeleteFile handles delete file
@@ -103,8 +133,28 @@ func (f *Files) HandleDeleteFile(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	log.Println(userName)
+	vars := mux.Vars(r)
+	fileName := ""
 
+	if _, found := vars["fileName"]; found {
+		fileName = vars["fileName"]
+	} else {
+		// no filename
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	deleted, err := f.UserStorage.DeleteFile(userName, fileName)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(model.NewException(err))
+		return
+	}
+	if !deleted {
+		w.WriteHeader(http.StatusNoContent)
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+	}
 }
 
 func (f *Files) validateAuth(r *http.Request) (string, error) {

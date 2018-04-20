@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/elumbantoruan/documentstorage/model"
 )
@@ -58,33 +59,66 @@ func (u *UserStorageFileRepository) UploadFile(request model.FileStorage) (*mode
 
 // GetFile returns a user file
 func (u *UserStorageFileRepository) GetFile(userName, fileName string) (*model.FileStorage, error) {
+	allFiles, err := u.getFiles()
+	if err != nil {
+		return nil, err
+	}
+	for _, f := range allFiles {
+		if strings.EqualFold(f.UserName, userName) &&
+			strings.EqualFold(f.FileName, fileName) {
+			return &f, nil
+		}
+	}
 	return nil, nil
 }
 
 // DeleteFile delete user file from storage
 func (u *UserStorageFileRepository) DeleteFile(userName, fileName string) (bool, error) {
-	return false, nil
+	files, err := u.getFiles()
+	if err != nil {
+		return false, err
+	}
+	found := false
+	for i, f := range files {
+		if strings.EqualFold(f.UserName, userName) &&
+			strings.EqualFold(f.FileName, fileName) {
+			files = append(files[:i], files[i+1:]...)
+			found = true
+			break
+		}
+	}
+	if !found {
+		return false, nil
+	}
+	sfname := fmt.Sprintf("%s/%s", u.currentPath, u.StorageFileName)
+	f, err := os.OpenFile(sfname, os.O_TRUNC|os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+	defer f.Close()
+	if err != nil {
+		return false, err
+	}
+
+	bytes, _ := json.MarshalIndent(files, "", "\t")
+	_, err = f.Write(bytes)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 // GetFiles returns all files belong to a specific user
 func (u *UserStorageFileRepository) GetFiles(userName string) ([]string, error) {
-	fileName := fmt.Sprintf("%s/%s", u.currentPath, u.StorageFileName)
-	var files []model.FileStorage
-
-	f, err := os.OpenFile(fileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
-	defer f.Close()
+	allFiles, err := u.getFiles()
 	if err != nil {
 		return nil, err
 	}
-	bytes, err := ioutil.ReadAll(f)
-	if len(bytes) == 0 {
-		return nil, nil
+	var files []string
+	for _, f := range allFiles {
+		if strings.EqualFold(f.UserName, userName) {
+			files = append(files, f.FileName)
+		}
 	}
-	err = json.Unmarshal(bytes, &files)
-	if err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return files, nil
 }
 
 // GetFiles returns all files belong to a specific user
