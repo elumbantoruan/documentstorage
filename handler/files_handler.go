@@ -130,7 +130,7 @@ func (f *Files) HandleGetFiles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(files)
 
@@ -162,7 +162,7 @@ func (f *Files) HandleDeleteFile(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(model.NewException(err))
 		return
 	}
-	if !deleted {
+	if deleted {
 		w.WriteHeader(http.StatusNoContent)
 	} else {
 		w.WriteHeader(http.StatusNotFound)

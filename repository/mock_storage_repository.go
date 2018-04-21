@@ -32,7 +32,7 @@ func (u *MockUserStorageRepository) UploadFile(request model.FileStorage) (*mode
 }
 
 // GetFile returns a user file
-func (u *MockUserStorageRepository) GetFile(userName, fileName string) (*model.FileStorage, error) {
+func (u *MockUserStorageRepository) GetFile(userName, fileName string) (*model.FileContent, error) {
 	allFiles, err := u.getFiles()
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (u *MockUserStorageRepository) GetFile(userName, fileName string) (*model.F
 	for _, f := range allFiles {
 		if strings.EqualFold(f.UserName, userName) &&
 			strings.EqualFold(f.FileName, fileName) {
-			return &f, nil
+			return &f.FileContent, nil
 		}
 	}
 	return nil, nil
