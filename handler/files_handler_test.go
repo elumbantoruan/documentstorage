@@ -234,6 +234,6 @@ func TestFiles_HandleDeleteFiles_NotLogin(t *testing.T) {
 	fs := repository.NewUserStorageMockRepository()
 	stor := NewFiles(fs)
 	stor.HandleDeleteFile(responseRecorder, request)
-	// user4 exists but test5.txt is not found
+	// no token
 	assert.Equal(t, http.StatusForbidden, responseRecorder.Code)
 }
