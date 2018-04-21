@@ -234,6 +234,6 @@ func TestFiles_HandleDeleteFiles_NotLogin(t *testing.T) {
 	fs := repository.NewUserStorageMockRepository()
 	stor := NewFiles(fs)
 	stor.HandleDeleteFile(responseRecorder, request)
-	// no token
+	// no token therefore status is forbidden
 	assert.Equal(t, http.StatusForbidden, responseRecorder.Code)
 }
