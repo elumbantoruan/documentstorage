@@ -1,5 +1,5 @@
 # Document Storage
-simple document storage
+Simple Document Storage
 
 ## Dependencies:
 * github.com/gorilla/mux
@@ -9,16 +9,16 @@ simple document storage
 
 ## Project Structures: 
 ### credentials
-It's a folder where user credentials are stored
+It's a folder where user credentials are stored.
 
 ### handler
 It's a package to manage the handler for files, login, and register resources.
 
 ### model
-It's a package for request and response payload
+It's a package for request and response payload.
 
 ### repository
-It's a package for interfaces: user credential and user storage. It contains the concrete implementation using file system and mock storage (in memory)
+It's a package for interfaces: user credential and user storage. It contains the concrete implementation using file system and mock storage (in memory).
 
 ### storage
-It's a folder where user storage are stored
+It's a folder where user storage are stored.
