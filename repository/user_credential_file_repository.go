@@ -13,6 +13,8 @@ import (
 	"github.com/elumbantoruan/documentstorage/model"
 )
 
+var users = make(map[string]model.Credentials)
+
 // UserCredentialFileRepository implements UserRepository interface in file system
 type UserCredentialFileRepository struct {
 	FileName    string
@@ -39,16 +41,16 @@ func (u *UserCredentialFileRepository) AddUser(creds model.Credentials) error {
 		return err
 	}
 
-	var users = make(map[string]interface{})
-	for _, eu := range existingUsers {
-		users[strings.ToLower(eu.UserName)] = nil
-	}
-	if _, exists := users[strings.ToLower(creds.UserName)]; exists {
+	if _, exists := existingUsers[strings.ToLower(creds.UserName)]; exists {
 		err = fmt.Errorf("user %s exists already", creds.UserName)
 		return err
 	}
 
-	existingUsers = append(existingUsers, creds)
+	var allUsers []model.Credentials
+
+	for _, v := range existingUsers {
+		allUsers = append(allUsers, v)
+	}
 
 	fileName := fmt.Sprintf("%s/%s", u.currentPath, u.FileName)
 	f, err := os.OpenFile(fileName, os.O_TRUNC|os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
@@ -57,7 +59,7 @@ func (u *UserCredentialFileRepository) AddUser(creds model.Credentials) error {
 		return err
 	}
 
-	bytes, _ := json.MarshalIndent(existingUsers, "", "\t")
+	bytes, _ := json.MarshalIndent(allUsers, "", "\t")
 	_, err = f.Write(bytes)
 	if err != nil {
 		return err
@@ -71,13 +73,13 @@ func (u *UserCredentialFileRepository) GetUser(creds model.Credentials) error {
 	if err != nil {
 		return err
 	}
-	var mapper = make(map[string]string)
-	for _, e := range existingUsers {
-		mapper[strings.ToLower(e.UserName)] = e.Password
-	}
+	// var mapper = make(map[string]string)
+	// for _, e := range existingUsers {
+	// 	mapper[strings.ToLower(e.UserName)] = e.Password
+	// }
 	credsInvalid := errors.New("username/login is not valid")
-	if v, ok := mapper[strings.ToLower(creds.UserName)]; ok {
-		if v != creds.Password {
+	if v, ok := existingUsers[strings.ToLower(creds.UserName)]; ok {
+		if v.Password != creds.Password {
 			return credsInvalid
 		}
 	} else {
@@ -86,7 +88,7 @@ func (u *UserCredentialFileRepository) GetUser(creds model.Credentials) error {
 	return nil
 }
 
-func (u *UserCredentialFileRepository) getAllUsers() ([]model.Credentials, error) {
+func (u *UserCredentialFileRepository) getAllUsers() (map[string]model.Credentials, error) {
 	fileName := fmt.Sprintf("%s/%s", u.currentPath, u.FileName)
 	var creds []model.Credentials
 
@@ -97,11 +99,18 @@ func (u *UserCredentialFileRepository) getAllUsers() ([]model.Credentials, error
 	}
 	bytes, err := ioutil.ReadAll(f)
 	if len(bytes) == 0 {
-		return creds, nil
+		return nil, nil
 	}
 	err = json.Unmarshal(bytes, &creds)
 	if err != nil {
 		return nil, err
 	}
-	return creds, nil
+	// lazy loading
+	if len(users) == 0 {
+		for _, eu := range creds {
+			users[strings.ToLower(eu.UserName)] = eu
+		}
+	}
+
+	return users, nil
 }
